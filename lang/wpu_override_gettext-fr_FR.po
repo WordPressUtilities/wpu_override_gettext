@@ -1,7 +1,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Override gettext\n"
+"POT-Creation-Date: 2022-11-05 23:34+0100\n"
 "PO-Revision-Date: \n"
+"Last-Translator: \n"
 "Language-Team: \n"
 "Language: fr_FR\n"
 "MIME-Version: 1.0\n"
@@ -10,6 +12,39 @@ msgstr ""
 "X-Poedit-SourceCharset: UTF-8\n"
 "X-Poedit-Basepath: .\n"
 "X-Poedit-KeywordsList: __;_x;_e\n"
+"X-Generator: Poedit 3.2\n"
 "X-Poedit-SearchPath-0: ../.\n"
 "X-Poedit-SearchPathExcluded-0: inc/WPUBaseAdminDatas\n"
 "X-Poedit-SearchPathExcluded-1: inc/WPUBaseSettings\n"
+
+#: .././inc/WPUBaseAdminPage/WPUBaseAdminPage.php:181
+msgid "Help"
+msgstr "Aide"
+
+#: .././wpu_override_gettext.php:35
+msgid "Override gettext strings"
+msgstr "Remplacer les chaînes gettext"
+
+#: .././wpu_override_gettext.php:42 .././wpu_override_gettext.php:44
+msgid "Settings"
+msgstr "Réglages"
+
+#: .././wpu_override_gettext.php:115
+msgid "String"
+msgstr "Chaîne"
+
+#: .././wpu_override_gettext.php:116
+msgid "Domain"
+msgstr "Domaine"
+
+#: .././wpu_override_gettext.php:117
+msgid "Custom translation"
+msgstr "Traduction personnalisée"
+
+#: .././wpu_override_gettext.php:135
+msgid "Save translations"
+msgstr "Enregistrer les traductions"
+
+#: .././wpu_override_gettext.php:148
+msgid "The translations were successfully saved."
+msgstr "Les traductions ont été sauvegardées avec succès."
