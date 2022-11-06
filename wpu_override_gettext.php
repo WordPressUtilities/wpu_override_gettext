@@ -4,7 +4,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.2.0
+Version: 0.2.1
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -14,13 +14,13 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUOverrideGettext {
-    private $plugin_version = '0.2.0';
+    private $plugin_version = '0.2.1';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
     );
     private $messages = false;
-    private $theme_id = false;
+    private $text_domain = false;
 
     public function __construct() {
         add_filter('plugins_loaded', array(&$this, 'plugins_loaded'));
@@ -28,10 +28,12 @@ class WPUOverrideGettext {
     }
 
     public function plugins_loaded() {
-        $this->theme_id = get_stylesheet();
+        $this->text_domain = apply_filters('wpu_override_gettext__text_domain', get_stylesheet());
 
         # TRANSLATION
-        load_plugin_textdomain('wpu_override_gettext', false, dirname(plugin_basename(__FILE__)) . '/lang/');
+        if (!load_plugin_textdomain('wpu_override_gettext', false, dirname(plugin_basename(__FILE__)) . '/lang/')) {
+            load_muplugin_textdomain('wpu_override_gettext', dirname(plugin_basename(__FILE__)) . '/lang/');
+        }
         $this->plugin_description = __('Override gettext strings', 'wpu_override_gettext');
 
         # ADMIN PAGE
@@ -78,11 +80,19 @@ class WPUOverrideGettext {
     public function page_content__main() {
 
         /* Parse all files in some known directories */
-        $files = $this->get_all_files(get_stylesheet_directory());
-        $muplugin_dir = ABSPATH . '/wp-content/mu-plugins/' . $this->theme_id;
-        if (is_dir($muplugin_dir)) {
-            $files += $this->get_all_files($muplugin_dir);
+        $directories = array(
+            get_stylesheet_directory(),
+            ABSPATH . '/wp-content/mu-plugins/' . $this->text_domain
+        );
+        $directories = apply_filters('wpu_override_gettext__directories', $directories);
+        $files = array();
+        foreach($directories as $dir){
+            if(!is_dir($dir)){
+                continue;
+            }
+            $files += $this->get_all_files($dir);
         }
+        $files = apply_filters('wpu_override_gettext__files', $files);
         natsort($files);
 
         /* In each file, find a translation string */
@@ -117,17 +127,20 @@ class WPUOverrideGettext {
         echo '<th>' . __('Custom translation', 'wpu_override_gettext') . '</th>';
         echo '</tr></thead>';
         foreach ($master_strings as $str) {
+            if (!isset($str['domain']) || $str['domain'] != $this->text_domain) {
+                continue;
+            }
             /* Load new translation if available */
             $new_translation = '';
             if (isset($translations[$str['string']])) {
                 $new_translation = $translations[$str['string']];
             }
             echo '<tr>';
-            echo '<td><strong>' . $str['string'] . '</strong><small style="display:block">' . implode('<br />', array_unique($str['files'])) . '</small></td>';
+            echo '<td><strong>' . esc_html($str['string']) . '</strong><small style="display:block">' . implode('<br />', array_unique($str['files'])) . '</small></td>';
             echo '<td>' . $str['domain'] . '</td>';
             echo '<td>';
             echo '<input type="hidden" name="original_string[]" value="' . esc_attr($str['string']) . '" />';
-            echo '<textarea name="translated_string[]" style="width:100%" placeholder="' . esc_attr($str['string']) . '">' . esc_html($new_translation) . '</textarea>';
+            echo '<textarea name="translated_string[]" style="width:100%" placeholder="' . esc_attr(__($str['string'], $str['domain'])) . '">' . esc_html($new_translation) . '</textarea>';
             echo '</td>';
             echo '</tr>';
         }
@@ -173,7 +186,7 @@ class WPUOverrideGettext {
     }
 
     function translate_text($translated_text, $untranslated_text, $domain) {
-        if ($this->theme_id !== $domain) {
+        if ($this->text_domain !== $domain) {
             return $translated_text;
         }
 
