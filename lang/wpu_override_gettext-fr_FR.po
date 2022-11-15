@@ -1,7 +1,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: WPU Override gettext\n"
-"POT-Creation-Date: 2022-11-05 23:34+0100\n"
+"POT-Creation-Date: 2022-11-15 19:39+0100\n"
 "PO-Revision-Date: \n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -21,30 +21,30 @@ msgstr ""
 msgid "Help"
 msgstr "Aide"
 
-#: .././wpu_override_gettext.php:35
+#: .././wpu_override_gettext.php:37
 msgid "Override gettext strings"
 msgstr "Remplacer les chaînes gettext"
 
-#: .././wpu_override_gettext.php:42 .././wpu_override_gettext.php:44
+#: .././wpu_override_gettext.php:44 .././wpu_override_gettext.php:46
 msgid "Settings"
 msgstr "Réglages"
 
-#: .././wpu_override_gettext.php:115
+#: .././wpu_override_gettext.php:127
 msgid "String"
 msgstr "Chaîne"
 
-#: .././wpu_override_gettext.php:116
+#: .././wpu_override_gettext.php:128
 msgid "Domain"
 msgstr "Domaine"
 
-#: .././wpu_override_gettext.php:117
+#: .././wpu_override_gettext.php:129
 msgid "Custom translation"
 msgstr "Traduction personnalisée"
 
-#: .././wpu_override_gettext.php:135
+#: .././wpu_override_gettext.php:150
 msgid "Save translations"
 msgstr "Enregistrer les traductions"
 
-#: .././wpu_override_gettext.php:148
+#: .././wpu_override_gettext.php:163
 msgid "The translations were successfully saved."
 msgstr "Les traductions ont été sauvegardées avec succès."
