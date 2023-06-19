@@ -4,17 +4,21 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.2.3
+Version: 0.3.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
 Domain Path: /lang/
+Requires at least: 6.2
+Requires PHP: 8.0
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUOverrideGettext {
-    private $plugin_version = '0.2.3';
+    public $plugin_description;
+    public $adminpages;
+    private $plugin_version = '0.3.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -92,7 +96,8 @@ class WPUOverrideGettext {
             if (!is_dir($dir)) {
                 continue;
             }
-            $files += $this->get_all_files($dir);
+            $new_files = $this->get_all_files($dir);
+            $files = array_merge($new_files, $files);
         }
         $files = apply_filters('wpu_override_gettext__files', $files);
         natsort($files);
@@ -168,6 +173,12 @@ class WPUOverrideGettext {
     /* HELPERS */
 
     function get_all_files($dir) {
+        $excluded_dirs = array('node_modules', 'vendor');
+        $dir_name = basename($dir);
+        if (in_array($dir_name, $excluded_dirs)) {
+            return array();
+        }
+
         $results = array();
         $files = scandir($dir);
 
