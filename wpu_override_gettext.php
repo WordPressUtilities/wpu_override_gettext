@@ -4,7 +4,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.3.0
+Version: 0.4.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -18,7 +18,7 @@ License URI: https://opensource.org/licenses/MIT
 class WPUOverrideGettext {
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.3.0';
+    private $plugin_version = '0.4.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -122,10 +122,7 @@ class WPUOverrideGettext {
         }
 
         /* Load existing translations */
-        $translations = get_option('wpu_override_gettext__translations');
-        if (!is_array($translations)) {
-            $translations = array();
-        }
+        $translations = $this->get_fixed_translations();
 
         echo '<table class="wp-list-table widefat striped">';
         echo '<thead><tr>';
@@ -138,10 +135,8 @@ class WPUOverrideGettext {
                 continue;
             }
             /* Load new translation if available */
-            $new_translation = '';
-            if (isset($translations[$str['string']])) {
-                $new_translation = $translations[$str['string']];
-            }
+            $new_translation = $this->get_string_translation($str['string'], '');
+
             echo '<tr>';
             echo '<td><strong>' . esc_html($str['string']) . '</strong><small style="display:block">' . implode('<br />', array_unique($str['files'])) . '</small></td>';
             echo '<td>' . $str['domain'] . '</td>';
@@ -171,6 +166,32 @@ class WPUOverrideGettext {
     }
 
     /* HELPERS */
+
+    function get_fixed_translations(){
+        $translations = get_option('wpu_override_gettext__translations');
+        if (!is_array($translations)) {
+            return array();
+        }
+        $translations_fixed = array();
+        foreach ($translations as $key => $translation) {
+            $translations_fixed[base64_encode(html_entity_decode($key))] = $translation;
+        }
+
+        return $translations_fixed;
+    }
+
+    function get_string_translation($string, $new_translation){
+        $translations = $this->get_fixed_translations();
+        if(!is_array($translations) || empty($translations)){
+            return $new_translation;
+        }
+
+        $key_string = base64_encode(html_entity_decode($string));
+        if (isset($translations[$key_string])) {
+            return $translations[$key_string];
+        }
+        return $new_translation;
+    }
 
     function get_all_files($dir) {
         $excluded_dirs = array('node_modules', 'vendor');
@@ -202,12 +223,8 @@ class WPUOverrideGettext {
         if (!is_array($this->text_domains) || !in_array($domain, $this->text_domains) || (is_admin() && isset($_GET['page']) && $_GET['page'] == 'wpu_override_gettext-main')) {
             return $translated_text;
         }
-        $translations = get_option('wpu_override_gettext__translations');
-        if (is_array($translations) && isset($translations[$untranslated_text])) {
-            return $translations[$untranslated_text];
-        }
 
-        return $translated_text;
+        return $this->get_string_translation($untranslated_text, $translated_text);
     }
 }
 
