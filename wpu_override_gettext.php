@@ -4,11 +4,11 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.4.0
+Version: 0.5.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
-Domain Path: /lang/
+Domain Path: /lang
 Requires at least: 6.2
 Requires PHP: 8.0
 License: MIT License
@@ -18,7 +18,7 @@ License URI: https://opensource.org/licenses/MIT
 class WPUOverrideGettext {
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.4.0';
+    private $plugin_version = '0.5.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -27,8 +27,9 @@ class WPUOverrideGettext {
     private $text_domains = false;
 
     public function __construct() {
-        add_filter('plugins_loaded', array(&$this, 'plugins_loaded'));
-        add_filter('gettext', array(&$this, 'translate_text'), 10, 3);
+        add_action('plugins_loaded', array(&$this, 'plugins_loaded'));
+        add_action('gettext', array(&$this, 'translate_text'), 10, 3);
+        add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
     }
 
     public function plugins_loaded() {
@@ -61,13 +62,13 @@ class WPUOverrideGettext {
             'level' => 'delete_users',
             'basename' => plugin_basename(__FILE__)
         );
-        include dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
+        require_once dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpu_override_gettext\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
 
         # MESSAGES
         if (is_admin()) {
-            include dirname(__FILE__) . '/inc/WPUBaseMessages/WPUBaseMessages.php';
+            require_once dirname(__FILE__) . '/inc/WPUBaseMessages/WPUBaseMessages.php';
             $this->messages = new \wpu_override_gettext\WPUBaseMessages($this->plugin_settings['id']);
         }
     }
@@ -124,7 +125,11 @@ class WPUOverrideGettext {
         /* Load existing translations */
         $translations = $this->get_fixed_translations();
 
-        echo '<table class="wp-list-table widefat striped">';
+        echo '<p>';
+        echo '<label for="wpu_override_gettext__filter_results">' . __('Filter strings', 'wpu_override_gettext') . '</label> ';
+        echo '<input name="wpu_override_gettext__filter_results" id="wpu_override_gettext__filter_results" type="text" />';
+        echo '</p>';
+        echo '<table id="wp-list-table--wpu_override_gettext" class="wp-list-table--wpu_override_gettext wp-list-table widefat striped">';
         echo '<thead><tr>';
         echo '<th>' . __('String', 'wpu_override_gettext') . '</th>';
         echo '<th>' . __('Domain', 'wpu_override_gettext') . '</th>';
@@ -134,15 +139,20 @@ class WPUOverrideGettext {
             if (!isset($str['domain']) || !in_array($str['domain'], $this->text_domains)) {
                 continue;
             }
+
             /* Load new translation if available */
             $new_translation = $this->get_string_translation($str['string'], '');
+            $old_translation = __($str['string'], $str['domain']);
+            $files_present = array_unique($str['files']);
+            $filter_text = array_merge($files_present, array($str['string'], $new_translation, $old_translation));
+            $filter_text = strtolower(strip_tags(implode(' ', array_unique(array_filter($filter_text)))));
 
-            echo '<tr>';
-            echo '<td><strong>' . esc_html($str['string']) . '</strong><small style="display:block">' . implode('<br />', array_unique($str['files'])) . '</small></td>';
+            echo '<tr data-visible="1" data-filter-text="' . esc_attr($filter_text) . '">';
+            echo '<td><strong>' . esc_html($str['string']) . '</strong><small style="display:block">' . implode('<br />', $files_present) . '</small></td>';
             echo '<td>' . $str['domain'] . '</td>';
             echo '<td>';
             echo '<input type="hidden" name="original_string[]" value="' . esc_attr($str['string']) . '" />';
-            echo '<textarea name="translated_string[]" style="width:100%" placeholder="' . esc_attr(__($str['string'], $str['domain'])) . '">' . esc_html($new_translation) . '</textarea>';
+            echo '<textarea name="translated_string[]" style="width:100%" placeholder="' . esc_attr($old_translation) . '">' . esc_html($new_translation) . '</textarea>';
             echo '</td>';
             echo '</tr>';
         }
@@ -165,9 +175,26 @@ class WPUOverrideGettext {
         }
     }
 
-    /* HELPERS */
+    /* ----------------------------------------------------------
+      Assets
+    ---------------------------------------------------------- */
 
-    function get_fixed_translations(){
+    function admin_enqueue_scripts() {
+
+        /* Back script */
+        wp_register_script('wpu_override_gettext_back_script', plugins_url('assets/back.js', __FILE__), array(), $this->plugin_version, true);
+        wp_enqueue_script('wpu_override_gettext_back_script');
+
+        /* Back Style */
+        wp_register_style('wpu_override_gettext_back_style', plugins_url('assets/back.css', __FILE__), array(), $this->plugin_version);
+        wp_enqueue_style('wpu_override_gettext_back_style');
+    }
+
+    /* ----------------------------------------------------------
+      Helpers
+    ---------------------------------------------------------- */
+
+    function get_fixed_translations() {
         $translations = get_option('wpu_override_gettext__translations');
         if (!is_array($translations)) {
             return array();
@@ -180,9 +207,9 @@ class WPUOverrideGettext {
         return $translations_fixed;
     }
 
-    function get_string_translation($string, $new_translation){
+    function get_string_translation($string, $new_translation) {
         $translations = $this->get_fixed_translations();
-        if(!is_array($translations) || empty($translations)){
+        if (!is_array($translations) || empty($translations)) {
             return $new_translation;
         }
 
