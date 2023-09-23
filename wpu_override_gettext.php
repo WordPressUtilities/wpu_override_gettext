@@ -4,7 +4,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.5.1
+Version: 0.5.2
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -18,7 +18,7 @@ License URI: https://opensource.org/licenses/MIT
 class WPUOverrideGettext {
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.5.1';
+    private $plugin_version = '0.5.2';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'

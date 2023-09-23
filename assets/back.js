@@ -14,7 +14,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     check_current_hash();
 
-    window.addEventListener("hashchange", function(e) {
+    window.addEventListener("hashchange", function() {
         check_current_hash();
     });
 
