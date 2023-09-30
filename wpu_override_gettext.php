@@ -4,7 +4,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.5.2
+Version: 0.6.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -16,9 +16,11 @@ License URI: https://opensource.org/licenses/MIT
 */
 
 class WPUOverrideGettext {
+    public $wpubasefilecache;
+    public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.5.2';
+    private $plugin_version = '0.6.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -65,6 +67,17 @@ class WPUOverrideGettext {
         require_once dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpu_override_gettext\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
+
+        # File Cache
+        require_once dirname( __FILE__ ) . '/inc/WPUBaseFileCache/WPUBaseFileCache.php';
+        $this->wpubasefilecache = new \wpu_override_gettext\WPUBaseFileCache('wpu_override_gettext');
+
+        # Base Update
+        require_once dirname( __FILE__ ) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        $this->settings_update = new \wpu_override_gettext\WPUBaseUpdate(
+            'WordPressUtilities',
+            'wpu_override_gettext',
+            $this->plugin_version);
 
         # MESSAGES
         if (is_admin()) {
@@ -169,7 +182,8 @@ class WPUOverrideGettext {
                 }
                 $translations[$value] = $_POST['translated_string'][$i];
             }
-            update_option('wpu_override_gettext__translations', $translations, true);
+            update_option('wpu_override_gettext__translations', $translations, false);
+            $this->wpubasefilecache->set_cache('translations', $translations);
             $this->set_message('saved_translations', __('The translations were successfully saved.', 'wpu_override_gettext'), 'notice');
             return;
         }
@@ -195,7 +209,13 @@ class WPUOverrideGettext {
     ---------------------------------------------------------- */
 
     function get_fixed_translations() {
-        $translations = get_option('wpu_override_gettext__translations');
+
+        $translations = $this->wpubasefilecache->get_cache('translations', 24 * 60 * 60);
+        if (!$translations) {
+            $translations = get_option('wpu_override_gettext__translations');
+            $this->wpubasefilecache->set_cache('translations', $translations);
+        }
+
         if (!is_array($translations)) {
             return array();
         }
