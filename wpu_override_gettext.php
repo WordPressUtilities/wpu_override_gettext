@@ -4,7 +4,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.6.0
+Version: 0.6.1
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -20,7 +20,7 @@ class WPUOverrideGettext {
     public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.6.0';
+    private $plugin_version = '0.6.1';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -69,11 +69,11 @@ class WPUOverrideGettext {
         $this->adminpages->init($pages_options, $admin_pages);
 
         # File Cache
-        require_once dirname( __FILE__ ) . '/inc/WPUBaseFileCache/WPUBaseFileCache.php';
+        require_once dirname(__FILE__) . '/inc/WPUBaseFileCache/WPUBaseFileCache.php';
         $this->wpubasefilecache = new \wpu_override_gettext\WPUBaseFileCache('wpu_override_gettext');
 
         # Base Update
-        require_once dirname( __FILE__ ) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpu_override_gettext\WPUBaseUpdate(
             'WordPressUtilities',
             'wpu_override_gettext',
@@ -174,19 +174,21 @@ class WPUOverrideGettext {
     }
 
     public function page_action__main() {
-        if (isset($_POST['original_string']) && is_array($_POST['original_string'])) {
-            $translations = array();
-            foreach ($_POST['original_string'] as $i => $value) {
-                if (!$_POST['translated_string'][$i]) {
-                    continue;
-                }
-                $translations[$value] = $_POST['translated_string'][$i];
-            }
-            update_option('wpu_override_gettext__translations', $translations, false);
-            $this->wpubasefilecache->set_cache('translations', $translations);
-            $this->set_message('saved_translations', __('The translations were successfully saved.', 'wpu_override_gettext'), 'notice');
+        if (!isset($_POST['original_string']) || !is_array($_POST['original_string'])) {
             return;
         }
+        $translations = array();
+        foreach ($_POST['original_string'] as $i => $value) {
+            if (!$_POST['translated_string'][$i]) {
+                continue;
+            }
+            $translations[$value] = $_POST['translated_string'][$i];
+        }
+        $translations = apply_filters('wpu_override_gettext__translations__before_save', $translations);
+        update_option('wpu_override_gettext__translations', $translations, false);
+        $this->wpubasefilecache->set_cache('translations', $translations);
+        $this->set_message('saved_translations', __('The translations were successfully saved.', 'wpu_override_gettext'), 'notice');
+
     }
 
     /* ----------------------------------------------------------
@@ -215,6 +217,7 @@ class WPUOverrideGettext {
             $translations = get_option('wpu_override_gettext__translations');
             $this->wpubasefilecache->set_cache('translations', $translations);
         }
+        $translations = apply_filters('wpu_override_gettext__translations__before_display', $translations);
 
         if (!is_array($translations)) {
             return array();
