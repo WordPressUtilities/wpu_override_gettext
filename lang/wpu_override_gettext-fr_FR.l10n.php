@@ -1,0 +1,2 @@
+<?php
+return ['domain'=>NULL,'plural-forms'=>NULL,'messages'=>['Help'=>'Aide','Override gettext strings'=>'Remplacer les chaînes gettext','Settings'=>'Réglages','String'=>'Chaîne','Domain'=>'Domaine','Custom translation'=>'Traduction personnalisée','Save translations'=>'Enregistrer les traductions','The translations were successfully saved.'=>'Les traductions ont été sauvegardées avec succès.'],'language'=>'fr_FR','x-generator'=>'Poedit 3.3.2'];

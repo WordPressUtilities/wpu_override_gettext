@@ -4,12 +4,14 @@ namespace wpu_override_gettext;
 /*
 Class Name: WPU Base File Cache
 Description: A class to handle basic file cache
-Version: 0.1.1
+Version: 0.2.0
 Author: Darklg
 Author URI: https://darklg.me/
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
+
+defined('ABSPATH') || die;
 
 class WPUBaseFileCache {
     private $cache_dir;
@@ -26,8 +28,9 @@ class WPUBaseFileCache {
         $cache_dir = $root_cache_dir . '/' . $this->cache_dir . '/';
         if (!is_dir($cache_dir)) {
             mkdir($cache_dir);
-            file_put_contents($cache_dir . 'index.html', '');
-            file_put_contents($cache_dir . '.htaccess', 'deny from all');
+            chmod($cache_dir, 0775);
+            $this->file_put_contents($cache_dir . 'index.html', '');
+            $this->file_put_contents($cache_dir . '.htaccess', 'deny from all');
         }
         return $cache_dir;
     }
@@ -49,7 +52,7 @@ class WPUBaseFileCache {
         if (!file_exists($cached_file)) {
             return false;
         }
-        if (filemtime($cached_file) + $expiration < time()) {
+        if ($expiration && filemtime($cached_file) + $expiration < time()) {
             return false;
         }
 
@@ -58,9 +61,15 @@ class WPUBaseFileCache {
 
     public function set_cache($cache_id, $content = '') {
         $cached_file = $this->get_cache_dir() . '/' . $cache_id;
-        file_put_contents($cached_file, serialize($content));
+        $this->file_put_contents($cached_file, serialize($content));
 
         return true;
+    }
+
+    /* Fix content creation */
+    public function file_put_contents($file, $content) {
+        file_put_contents($file, $content);
+        chmod($file, 0664);
     }
 
 }

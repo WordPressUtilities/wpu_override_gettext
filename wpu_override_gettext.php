@@ -1,16 +1,18 @@
 <?php
+defined('ABSPATH') || die;
 /*
 Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.6.1
+Version: 0.7.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
 Domain Path: /lang
 Requires at least: 6.2
 Requires PHP: 8.0
+Network: Optional
 License: MIT License
 License URI: https://opensource.org/licenses/MIT
 */
@@ -20,7 +22,7 @@ class WPUOverrideGettext {
     public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.6.1';
+    private $plugin_version = '0.7.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -64,16 +66,16 @@ class WPUOverrideGettext {
             'level' => 'delete_users',
             'basename' => plugin_basename(__FILE__)
         );
-        require_once dirname(__FILE__) . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
+        require_once __DIR__ . '/inc/WPUBaseAdminPage/WPUBaseAdminPage.php';
         $this->adminpages = new \wpu_override_gettext\WPUBaseAdminPage();
         $this->adminpages->init($pages_options, $admin_pages);
 
         # File Cache
-        require_once dirname(__FILE__) . '/inc/WPUBaseFileCache/WPUBaseFileCache.php';
+        require_once __DIR__ . '/inc/WPUBaseFileCache/WPUBaseFileCache.php';
         $this->wpubasefilecache = new \wpu_override_gettext\WPUBaseFileCache('wpu_override_gettext');
 
         # Base Update
-        require_once dirname(__FILE__) . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
+        require_once __DIR__ . '/inc/WPUBaseUpdate/WPUBaseUpdate.php';
         $this->settings_update = new \wpu_override_gettext\WPUBaseUpdate(
             'WordPressUtilities',
             'wpu_override_gettext',
@@ -81,7 +83,7 @@ class WPUOverrideGettext {
 
         # MESSAGES
         if (is_admin()) {
-            require_once dirname(__FILE__) . '/inc/WPUBaseMessages/WPUBaseMessages.php';
+            require_once __DIR__ . '/inc/WPUBaseMessages/WPUBaseMessages.php';
             $this->messages = new \wpu_override_gettext\WPUBaseMessages($this->plugin_settings['id']);
         }
     }
