@@ -66,7 +66,9 @@ class WPUBaseFileCache {
         return true;
     }
 
-    /* Fix content creation */
+    /**
+     * Writes content to a file and sets the file permissions.
+     */
     public function file_put_contents($file, $content) {
         file_put_contents($file, $content);
         chmod($file, 0664);
