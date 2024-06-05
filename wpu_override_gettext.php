@@ -5,7 +5,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.7.1
+Version: 0.7.2
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -22,7 +22,7 @@ class WPUOverrideGettext {
     public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.7.1';
+    private $plugin_version = '0.7.2';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -189,7 +189,7 @@ class WPUOverrideGettext {
         $translations = apply_filters('wpu_override_gettext__translations__before_save', $translations);
         update_option('wpu_override_gettext__translations', $translations, false);
         $this->wpubasefilecache->set_cache('translations', $translations);
-        $this->set_message('saved_translations', __('The translations were successfully saved.', 'wpu_override_gettext'), 'notice');
+        $this->set_message('saved_translations', __('The translations were successfully saved.', 'wpu_override_gettext'), 'updated');
 
     }
 
