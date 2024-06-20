@@ -7,3 +7,16 @@
 .wp-list-table--wpu_override_gettext tr[data-visible="0"] {
     display: none;
 }
+
+#wpu_override_gettext__sort-by-string:after {
+    display: inline-block;
+    margin-left: 0.1em;
+}
+
+#wpu_override_gettext__sort-by-string[data-sort="asc"]:after {
+    content: "▲";
+}
+
+#wpu_override_gettext__sort-by-string[data-sort="desc"]:after {
+    content: "▼";
+}

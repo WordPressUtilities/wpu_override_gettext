@@ -32,15 +32,45 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     /* ----------------------------------------------------------
+      Sort
+    ---------------------------------------------------------- */
+
+    var $sort_btn = document.getElementById('wpu_override_gettext__sort-by-string');
+    if ($sort_btn) {
+        $sort_btn.addEventListener('click', function() {
+            var _new_sort = ($sort_btn.getAttribute('data-sort') == 'asc' ? 'desc' : 'asc');
+            $sort_btn.setAttribute('data-sort', _new_sort);
+            sort_table(_new_sort);
+        });
+    }
+
+    function sort_table(_new_sort) {
+        var $table_lines_array = Array.prototype.slice.call($table_lines);
+        $table_lines_array.sort(function(a, b) {
+            var a_text = a.getAttribute('data-filter-text').toLowerCase();
+            var b_text = b.getAttribute('data-filter-text').toLowerCase();
+            if (_new_sort == 'desc') {
+                var c = a_text;
+                a_text = b_text;
+                b_text = c;
+            }
+            return a_text.localeCompare(b_text);
+        });
+        $table_lines_array.forEach(function(el) {
+            $table.appendChild(el);
+        });
+    }
+
+    /* ----------------------------------------------------------
       Filter
     ---------------------------------------------------------- */
 
     var _timeout_keyup;
     $filter.addEventListener('keyup', function() {
         clearTimeout(_timeout_keyup);
-        _timeout_keyup = setTimeout(function(){
+        _timeout_keyup = setTimeout(function() {
             filter_table($filter.value);
-        },200);
+        }, 200);
     }, 1);
 
     function filter_table(filter_value) {
@@ -51,6 +81,7 @@ document.addEventListener("DOMContentLoaded", function() {
             Array.prototype.forEach.call($table_lines, function(el) {
                 el.setAttribute('data-visible', '1');
             });
+            location.hash = '';
             return;
         }
         filter_value = filter_value.toLowerCase().trim();

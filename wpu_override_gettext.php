@@ -5,7 +5,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.7.2
+Version: 0.8.0
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -22,7 +22,7 @@ class WPUOverrideGettext {
     public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.7.2';
+    private $plugin_version = '0.8.0';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -146,7 +146,7 @@ class WPUOverrideGettext {
         echo '</p>';
         echo '<table id="wp-list-table--wpu_override_gettext" class="wp-list-table--wpu_override_gettext wp-list-table widefat striped">';
         echo '<thead><tr>';
-        echo '<th>' . __('String', 'wpu_override_gettext') . '</th>';
+        echo '<th><a href="#" id="wpu_override_gettext__sort-by-string">' . __('String', 'wpu_override_gettext') . '</a></th>';
         echo '<th>' . __('Domain', 'wpu_override_gettext') . '</th>';
         echo '<th>' . __('Custom translation', 'wpu_override_gettext') . '</th>';
         echo '</tr></thead>';
@@ -159,7 +159,7 @@ class WPUOverrideGettext {
             $new_translation = $this->get_string_translation($str['string'], '');
             $old_translation = __($str['string'], $str['domain']);
             $files_present = array_unique($str['files']);
-            $filter_text = array_merge($files_present, array($str['string'], $new_translation, $old_translation));
+            $filter_text = array_merge(array($str['string'], $new_translation, $old_translation), $files_present);
             $filter_text = strtolower(strip_tags(implode(' ', array_unique(array_filter($filter_text)))));
 
             echo '<tr data-visible="1" data-filter-text="' . esc_attr($filter_text) . '">';
