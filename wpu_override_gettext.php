@@ -5,7 +5,7 @@ Plugin Name: WPU Override gettext
 Plugin URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Update URI: https://github.com/WordPressUtilities/wpu_override_gettext
 Description: Override gettext strings
-Version: 0.8.0
+Version: 0.8.1
 Author: darklg
 Author URI: https://darklg.me/
 Text Domain: wpu_override_gettext
@@ -22,7 +22,7 @@ class WPUOverrideGettext {
     public $settings_update;
     public $plugin_description;
     public $adminpages;
-    private $plugin_version = '0.8.0';
+    private $plugin_version = '0.8.1';
     private $plugin_settings = array(
         'id' => 'wpu_override_gettext',
         'name' => 'WPU Override gettext'
@@ -31,19 +31,25 @@ class WPUOverrideGettext {
     private $text_domains = false;
 
     public function __construct() {
+        add_action('init', array(&$this, 'load_translation'));
         add_action('plugins_loaded', array(&$this, 'plugins_loaded'));
         add_action('gettext', array(&$this, 'translate_text'), 10, 3);
         add_action('admin_enqueue_scripts', array(&$this, 'admin_enqueue_scripts'));
     }
 
-    public function plugins_loaded() {
-        $this->text_domains = apply_filters('wpu_override_gettext__text_domains', array(get_stylesheet()));
-
-        # TRANSLATION
-        if (!load_plugin_textdomain('wpu_override_gettext', false, dirname(plugin_basename(__FILE__)) . '/lang/')) {
-            load_muplugin_textdomain('wpu_override_gettext', dirname(plugin_basename(__FILE__)) . '/lang/');
+    # TRANSLATION
+    public function load_translation() {
+        $lang_dir = dirname(plugin_basename(__FILE__)) . '/lang/';
+        if (strpos(__DIR__, 'mu-plugins') !== false) {
+            load_muplugin_textdomain('wpu_override_gettext', $lang_dir);
+        } else {
+            load_plugin_textdomain('wpu_override_gettext', false, $lang_dir);
         }
         $this->plugin_description = __('Override gettext strings', 'wpu_override_gettext');
+    }
+
+    public function plugins_loaded() {
+        $this->text_domains = apply_filters('wpu_override_gettext__text_domains', array(get_stylesheet()));
 
         # ADMIN PAGE
         $admin_pages = array(
@@ -197,7 +203,7 @@ class WPUOverrideGettext {
       Assets
     ---------------------------------------------------------- */
 
-    function admin_enqueue_scripts() {
+    public function admin_enqueue_scripts() {
 
         /* Back script */
         wp_register_script('wpu_override_gettext_back_script', plugins_url('assets/back.js', __FILE__), array(), $this->plugin_version, true);
@@ -212,7 +218,7 @@ class WPUOverrideGettext {
       Helpers
     ---------------------------------------------------------- */
 
-    function get_fixed_translations() {
+    public function get_fixed_translations() {
 
         $translations = $this->wpubasefilecache->get_cache('translations', 24 * 60 * 60);
         if (!$translations) {
@@ -232,7 +238,7 @@ class WPUOverrideGettext {
         return $translations_fixed;
     }
 
-    function get_string_translation($string, $new_translation) {
+    public function get_string_translation($string, $new_translation) {
         $translations = $this->get_fixed_translations();
         if (!is_array($translations) || empty($translations)) {
             return $new_translation;
@@ -245,7 +251,7 @@ class WPUOverrideGettext {
         return $new_translation;
     }
 
-    function get_all_files($dir) {
+    public function get_all_files($dir) {
         $excluded_dirs = array('node_modules', 'vendor');
         $dir_name = basename($dir);
         if (in_array($dir_name, $excluded_dirs)) {
@@ -271,7 +277,7 @@ class WPUOverrideGettext {
         return $results;
     }
 
-    function translate_text($translated_text, $untranslated_text, $domain) {
+    public function translate_text($translated_text, $untranslated_text, $domain) {
         if (!is_array($this->text_domains) || !in_array($domain, $this->text_domains) || (is_admin() && isset($_GET['page']) && $_GET['page'] == 'wpu_override_gettext-main')) {
             return $translated_text;
         }
